@@ -1,0 +1,12 @@
+
+rules:
+  - id: unsafe-eval-usage
+    pattern: eval(...)
+    message: "Avoid eval() because it can execute unsafe JavaScript."
+    severity: ERROR
+    languages:
+      - javascript
+    metadata:
+      category: security
+      cwe:
+        - "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code"
