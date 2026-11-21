@@ -63,29 +63,86 @@ function getSession() {
 }
 
 
+function loginLocked() {
+  const until = Number(
+    sessionStorage.getItem("loginLockedUntil") || 0
+  );
+
+  return Date.now() < until;
+}
+
+function recordFailedLogin() {
+  const attempts = Number(
+    sessionStorage.getItem("failedAttempts") || 0
+  ) + 1;
+
+  sessionStorage.setItem("failedAttempts", String(attempts));
+
+  if (attempts >= 3) {
+    sessionStorage.setItem(
+      "loginLockedUntil",
+      String(Date.now() + 30000)
+    );
+    return true;
+  }
+
+  return false;
+}
+
+function resetLoginAttempts() {
+  sessionStorage.removeItem("failedAttempts");
+  sessionStorage.removeItem("loginLockedUntil");
+}
+
+
 
 $("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  const msg = $("loginMsg");
+
+  if (loginLocked()) {
+    const remaining = Math.ceil(
+      (Number(sessionStorage.getItem("loginLockedUntil")) - Date.now()) / 1000
+    );
+
+    msg.textContent =
+      "Too many failed attempts. Try again in " + remaining + " seconds.";
+    return;
+  }
 
   const email = $("email").value;
   const pw = $("password").value;
   const u = USERS.find((x) => x.email === email);
 
-  if (!u || (await sha256("uw" + u.id + pw)) !== u.passwordHash) {
-    $("loginMsg").textContent = "Login failed for " + email;
+  const valid =
+    u && (await sha256("uw" + u.id + pw)) === u.passwordHash;
+
+  if (!valid) {
+    const blocked = recordFailedLogin();
+
+    msg.textContent = blocked
+      ? "Too many failed attempts. Login blocked for 30 seconds."
+      : "Login failed for " + email;
+
     return;
   }
+
+  resetLoginAttempts();
+  msg.textContent = "";
 
   sessionStorage.setItem("uid", String(u.id));
 
   const next = params.get("next");
-  if (next) {
-    location.href = next;
+
+  if (next === "index.html") {
+    window.location.assign("./index.html");
     return;
   }
 
   render();
 });
+
 
 
 $("resultForm").addEventListener("submit", (e) => { e.preventDefault(); showResult($("rid").value); });
