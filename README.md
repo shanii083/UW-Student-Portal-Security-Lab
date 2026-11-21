@@ -55,4 +55,7 @@ semgrep scan --config semgrep-rules.yml --exclude instructor . --json -o semgrep
 - Do not test the University of Wah website, another student's site or any third-party system.
 - GitHub Pages is static hosting. It cannot provide genuine server-side authentication, authorization, database protection, rate limiting or secret storage.
 - Client-side checks are demonstrations only. In your report, identify which issues can be mitigated in the browser and which require a backend in a real application.
-- The Semgrep rules detect only selected patterns. A clean scan does not prove that the application is fully secure.
+- The Semgrep rules detect only selected patterns. A clean scan does not prove that the application is fully secure.                                                      ## Collaborator Contribution
+Updated by UW-24-CY-BS-029.
+
+
